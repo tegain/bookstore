@@ -1,12 +1,14 @@
 using System;
 using System.IO;
 using System.Reflection;
+using AutoMapper;
 using BookStore_API.Contracts;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using BookStore_API.Data;
+using BookStore_API.Mappers;
 using BookStore_API.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -40,6 +42,8 @@ namespace BookStore_API
                 options.AddPolicy(CorsPolicyName,
                     builder => builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
             });
+
+            services.AddAutoMapper(typeof(Maps));
 
             services.AddSwaggerGen(options =>
             {
