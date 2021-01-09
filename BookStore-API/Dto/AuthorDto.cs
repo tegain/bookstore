@@ -29,8 +29,8 @@ namespace BookStore_API.Dto
     
     public class UpdateAuthorDto
     {
-        [Required]
-        public int Id { get; set; }
+        // [Required]
+        // public int Id { get; set; }
         
         public string Firstname { get; set; }
         

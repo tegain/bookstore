@@ -11,9 +11,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace BookStore_API.Controllers
 {
-    /// <summary>
-    /// Interact with Authors 
-    /// </summary>
     [Route("api/[controller]")]
     [ApiController]
     [ProducesResponseType(StatusCodes.Status200OK)]
@@ -31,7 +28,7 @@ namespace BookStore_API.Controllers
         }
 
         /// <summary>
-        /// Get all authors
+        /// Retrieve all authors
         /// </summary>
         /// <returns>A list of authors</returns>
         [HttpGet]
@@ -47,18 +44,18 @@ namespace BookStore_API.Controllers
                 _logger.LogInfo("Authors successfully retrieved");
                 return Ok(response);
             }
-            catch (Exception exception)
+            catch (Exception e)
             {
-                return InternalError($"{exception.Message} - {exception.InnerException}");
+                return InternalError($"{e.Message} - {e.InnerException}");
             }
         }
 
         /// <summary>
-        /// Returns a single author
+        /// Retrieve a single author
         /// </summary>
         /// <param name="id">Author ID</param>
         /// <returns>A single record</returns>
-        [HttpGet("{id}")]
+        [HttpGet("{id:int}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -78,9 +75,9 @@ namespace BookStore_API.Controllers
                 _logger.LogInfo("Authors successfully retrieved");
                 return Ok(response);
             }
-            catch (Exception exception)
+            catch (Exception e)
             {
-                return InternalError($"{exception.Message} - {exception.InnerException}");
+                return InternalError($"{e.Message} - {e.InnerException}");
             }
         }
 
@@ -118,11 +115,11 @@ namespace BookStore_API.Controllers
                 }
 
                 _logger.LogInfo("Author created");
-                return Created("Create", new { author });
+                return CreatedAtAction(nameof(GetAuthorById), new { id = author.Id }, author);
             }
-            catch (Exception exception)
+            catch (Exception e)
             {
-                return InternalError($"{exception.Message} - {exception.InnerException}");
+                return InternalError($"{e.Message} - {e.InnerException}");
             }
         }
 
@@ -132,7 +129,7 @@ namespace BookStore_API.Controllers
         /// <param name="id"></param>
         /// <param name="updateAuthorDto"></param>
         /// <returns></returns>
-        [HttpPut("{id}")]
+        [HttpPut("{id:int}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -141,7 +138,7 @@ namespace BookStore_API.Controllers
         {
             try
             {
-                if (updateAuthorDto == null || id != updateAuthorDto.Id)
+                if (updateAuthorDto == null)
                 {
                     _logger.LogWarn("Update Author: empty request body");
                     return BadRequest(ModelState);
@@ -157,20 +154,23 @@ namespace BookStore_API.Controllers
                 if (!authorExists)
                     return NotFound();
 
-                var author = _mapper.Map<Author>(updateAuthorDto);
+                var author = _mapper.Map<Author>(updateAuthorDto, (options) =>
+                {
+                    options.AfterMap((src, dest) => dest.Id = id);
+                });
                 var isRecordSaved = await _authorRepository.Update(author);
 
                 if (!isRecordSaved)
                 {
-                    return InternalError("Author update failed");
+                    return InternalError($"Author update failed");
                 }
 
-                _logger.LogInfo("Author updated");
+                _logger.LogInfo($"Author updated");
                 return NoContent();
             }
-            catch (Exception exception)
+            catch (Exception e)
             {
-                return InternalError($"{exception.Message} - {exception.InnerException}");
+                return InternalError($"{e.Message} - {e.InnerException}");
             }
         }
 
@@ -179,7 +179,7 @@ namespace BookStore_API.Controllers
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        [HttpDelete("{id}")]
+        [HttpDelete("{id:int}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
